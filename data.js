@@ -1,0 +1,341 @@
+/* ===========================================================================
+   ДАННЫЕ ПРИЛОЖЕНИЯ — здесь вы правите содержание, не трогая интерфейс.
+
+   Как добавить слово в колоду:
+     { de: "das Beispiel, -e", ru: "пример", ex: "Das ist ein Beispiel.", exRu: "Это пример." }
+
+   Как добавить колоду: скопируйте любой блок { id, title, de, hint, words }
+   и дайте новый уникальный id латиницей.
+
+   Как добавить урок грамматики: L("A1", "a1-9", "Заголовок", "Идея одной строкой", [
+       { h: "Название таблицы", rows: [["левая ячейка", "правая ячейка"]] },
+       { p: "Абзац объяснения." },
+       { ex: ["Пример на немецком.", "Второй пример."] },
+     ])
+   Уровень должен быть одним из LEVELS. Файл сохраняется — обновите страницу.
+   =========================================================================== */
+
+const DECKS = [
+  {
+    id: "nomen",
+    title: "Существительные",
+    de: "Substantive",
+    hint: "Артикль учим вместе со словом",
+    words: [
+      { de: "der Termin, -e", ru: "приём, встреча (по записи)", ex: "Ich habe morgen einen Termin beim Arzt.", exRu: "У меня завтра приём у врача." },
+      { de: "die Rechnung, -en", ru: "счёт (к оплате)", ex: "Die Rechnung kommt am Monatsende.", exRu: "Счёт приходит в конце месяца." },
+      { de: "die Wohnung, -en", ru: "квартира", ex: "Die Wohnung liegt im dritten Stock.", exRu: "Квартира на третьем этаже." },
+      { de: "der Vertrag, ¨-e", ru: "договор", ex: "Ich habe den Vertrag unterschrieben.", exRu: "Я подписал договор." },
+      { de: "die Anmeldung, -en", ru: "регистрация, прописка", ex: "Ohne Anmeldung geht hier nichts.", exRu: "Без прописки здесь ничего не выйдет." },
+      { de: "das Konto, Konten", ru: "счёт в банке", ex: "Das Geld ist schon auf dem Konto.", exRu: "Деньги уже на счету." },
+      { de: "der Ausweis, -e", ru: "удостоверение личности", ex: "Zeigen Sie bitte Ihren Ausweis.", exRu: "Покажите, пожалуйста, документ." },
+      { de: "die Frist, -en", ru: "срок", ex: "Die Frist läuft am Freitag ab.", exRu: "Срок истекает в пятницу." },
+      { de: "die Erfahrung, -en", ru: "опыт", ex: "Er hat viel Erfahrung im Verkauf.", exRu: "У него большой опыт в продажах." },
+      { de: "das Angebot, -e", ru: "предложение, оферта", ex: "Das Angebot gilt bis Sonntag.", exRu: "Предложение действует до воскресенья." },
+      { de: "die Versicherung, -en", ru: "страховка", ex: "Die Versicherung zahlt den Schaden.", exRu: "Страховка покрывает ущерб." },
+      { de: "der Grund, ¨-e", ru: "причина", ex: "Es gibt keinen Grund zur Sorge.", exRu: "Нет причин для беспокойства." },
+      { de: "die Entscheidung, -en", ru: "решение", ex: "Das war eine schwere Entscheidung.", exRu: "Это было трудное решение." },
+      { de: "der Zettel, -", ru: "листок, записка", ex: "Schreib es auf einen Zettel.", exRu: "Запиши это на листке." },
+      { de: "die Umgebung, -en", ru: "окружение, окрестности", ex: "Die Umgebung ist sehr ruhig.", exRu: "Район очень тихий." },
+      { de: "der Vorschlag, ¨-e", ru: "предложение (идея)", ex: "Ich habe einen Vorschlag.", exRu: "У меня есть предложение." },
+      { de: "die Rücksicht", ru: "внимание, учёт (интересов)", ex: "Nimm bitte Rücksicht auf die Nachbarn.", exRu: "Считайся, пожалуйста, с соседями." },
+      { de: "der Zusammenhang, ¨-e", ru: "связь, контекст", ex: "In diesem Zusammenhang ist das wichtig.", exRu: "В этом контексте это важно." },
+    ],
+  },
+  {
+    id: "verben",
+    title: "Глаголы",
+    de: "Verben",
+    hint: "Три формы: Infinitiv — Präteritum — Partizip II",
+    words: [
+      { de: "brauchen", ru: "нуждаться, требоваться", ex: "Ich brauche mehr Zeit.", exRu: "Мне нужно больше времени." },
+      { de: "bekommen — bekam — bekommen", ru: "получать", ex: "Ich habe die Antwort noch nicht bekommen.", exRu: "Я ещё не получил ответ." },
+      { de: "bringen — brachte — gebracht", ru: "приносить", ex: "Bring mir bitte den Schlüssel.", exRu: "Принеси мне, пожалуйста, ключ." },
+      { de: "verstehen — verstand — verstanden", ru: "понимать", ex: "Ich habe die Frage nicht verstanden.", exRu: "Я не понял вопрос." },
+      { de: "entscheiden — entschied — entschieden", ru: "решать", ex: "Wir müssen uns heute entscheiden.", exRu: "Мы должны решить сегодня." },
+      { de: "vergessen — vergaß — vergessen", ru: "забывать", ex: "Ich habe den Termin vergessen.", exRu: "Я забыл про встречу." },
+      { de: "erklären", ru: "объяснять", ex: "Kannst du mir das erklären?", exRu: "Можешь мне это объяснить?" },
+      { de: "bestellen", ru: "заказывать", ex: "Wir bestellen zwei Kaffee.", exRu: "Мы закажем два кофе." },
+      { de: "sich kümmern (um)", ru: "заботиться, заниматься", ex: "Ich kümmere mich um die Papiere.", exRu: "Я займусь документами." },
+      { de: "beantragen", ru: "подавать заявление", ex: "Ich beantrage ein Visum.", exRu: "Я подаю на визу." },
+      { de: "erledigen", ru: "улаживать, выполнять", ex: "Ich erledige das bis Montag.", exRu: "Я сделаю это до понедельника." },
+      { de: "sich bewerben (um)", ru: "подавать заявку на работу", ex: "Ich bewerbe mich um die Stelle.", exRu: "Я претендую на эту должность." },
+      { de: "verzichten (auf)", ru: "отказываться от", ex: "Ich verzichte auf den Zucker.", exRu: "Я отказываюсь от сахара." },
+      { de: "voraussetzen", ru: "предполагать (условие)", ex: "Die Stelle setzt Deutsch B2 voraus.", exRu: "Должность требует немецкого B2." },
+      { de: "berücksichtigen", ru: "учитывать", ex: "Wir berücksichtigen Ihre Wünsche.", exRu: "Мы учтём ваши пожелания." },
+      { de: "aufhören (mit)", ru: "прекращать", ex: "Hör bitte damit auf!", exRu: "Прекрати, пожалуйста!" },
+      { de: "vorschlagen — schlug vor — vorgeschlagen", ru: "предлагать", ex: "Ich schlage einen anderen Termin vor.", exRu: "Я предлагаю другое время." },
+      { de: "einschätzen", ru: "оценивать", ex: "Wie schätzt du die Lage ein?", exRu: "Как ты оцениваешь ситуацию?" },
+    ],
+  },
+  {
+    id: "pronomen",
+    title: "Местоимения",
+    de: "Pronomen",
+    hint: "Nominativ → Akkusativ → Dativ",
+    words: [
+      { de: "ich — mich — mir", ru: "я — меня — мне", ex: "Kannst du mir helfen?", exRu: "Можешь мне помочь?" },
+      { de: "du — dich — dir", ru: "ты — тебя — тебе", ex: "Ich rufe dich später an.", exRu: "Я позвоню тебе позже." },
+      { de: "er — ihn — ihm", ru: "он — его — ему", ex: "Ich kenne ihn gut.", exRu: "Я хорошо его знаю." },
+      { de: "sie — sie — ihr", ru: "она — её — ей", ex: "Gib ihr bitte den Brief.", exRu: "Дай ей, пожалуйста, письмо." },
+      { de: "wir — uns — uns", ru: "мы — нас — нам", ex: "Wir sehen uns morgen.", exRu: "Увидимся завтра." },
+      { de: "ihr — euch — euch", ru: "вы (мн.) — вас — вам", ex: "Ich schreibe euch heute.", exRu: "Я напишу вам сегодня." },
+      { de: "Sie — Sie — Ihnen", ru: "Вы (вежл.)", ex: "Wie geht es Ihnen?", exRu: "Как у Вас дела?" },
+      { de: "mein / meine", ru: "мой / моя", ex: "Das ist meine Schwester.", exRu: "Это моя сестра." },
+      { de: "dieser / diese / dieses", ru: "этот / эта / это", ex: "Dieses Buch gefällt mir.", exRu: "Эта книга мне нравится." },
+      { de: "jeder / jede / jedes", ru: "каждый", ex: "Jeder Student bekommt einen Platz.", exRu: "Каждый студент получает место." },
+      { de: "man", ru: "неопределённое «люди, кто-то»", ex: "Hier darf man nicht rauchen.", exRu: "Здесь нельзя курить." },
+      { de: "welcher / welche / welches", ru: "какой / который", ex: "Welche Farbe möchtest du?", exRu: "Какой цвет ты хочешь?" },
+      { de: "niemand / jemand", ru: "никто / кто-то", ex: "Niemand hat angerufen.", exRu: "Никто не звонил." },
+      { de: "sich", ru: "себя (возвратное)", ex: "Er wäscht sich.", exRu: "Он умывается." },
+    ],
+  },
+  {
+    id: "adjektive",
+    title: "Прилагательные",
+    de: "Adjektive",
+    hint: "Пары противоположностей запоминаются быстрее",
+    words: [
+      { de: "wichtig ↔ egal", ru: "важный ↔ безразлично", ex: "Das ist mir nicht egal.", exRu: "Мне это не безразлично." },
+      { de: "günstig ↔ teuer", ru: "выгодный ↔ дорогой", ex: "Das Angebot ist sehr günstig.", exRu: "Предложение очень выгодное." },
+      { de: "möglich ↔ unmöglich", ru: "возможный ↔ невозможный", ex: "Ist das möglich?", exRu: "Это возможно?" },
+      { de: "pünktlich", ru: "пунктуальный", ex: "Sei bitte pünktlich.", exRu: "Будь, пожалуйста, вовремя." },
+      { de: "zuverlässig", ru: "надёжный", ex: "Er ist ein zuverlässiger Kollege.", exRu: "Он надёжный коллега." },
+      { de: "anstrengend", ru: "утомительный", ex: "Der Tag war anstrengend.", exRu: "День был утомительным." },
+      { de: "selbstständig", ru: "самостоятельный", ex: "Sie arbeitet sehr selbstständig.", exRu: "Она работает очень самостоятельно." },
+      { de: "vorsichtig", ru: "осторожный", ex: "Sei vorsichtig auf der Straße.", exRu: "Будь осторожен на улице." },
+      { de: "deutlich", ru: "чёткий, явный", ex: "Sprich bitte deutlicher.", exRu: "Говори, пожалуйста, чётче." },
+      { de: "üblich", ru: "обычный, принятый", ex: "Trinkgeld ist hier üblich.", exRu: "Чаевые здесь приняты." },
+      { de: "zufrieden (mit)", ru: "довольный", ex: "Ich bin mit dem Ergebnis zufrieden.", exRu: "Я доволен результатом." },
+      { de: "aufwendig", ru: "затратный, трудоёмкий", ex: "Das Verfahren ist aufwendig.", exRu: "Процедура трудоёмкая." },
+      { de: "nachhaltig", ru: "устойчивый, долгосрочный", ex: "Wir suchen eine nachhaltige Lösung.", exRu: "Мы ищем долгосрочное решение." },
+      { de: "einverstanden", ru: "согласный", ex: "Bist du damit einverstanden?", exRu: "Ты с этим согласен?" },
+    ],
+  },
+  {
+    id: "praep",
+    title: "Предлоги и связки",
+    de: "Präpositionen & Konnektoren",
+    hint: "Предлог всегда учим с падежом",
+    words: [
+      { de: "mit + Dativ", ru: "с (кем/чем)", ex: "Ich fahre mit dem Bus.", exRu: "Я еду на автобусе." },
+      { de: "seit + Dativ", ru: "с (какого-то момента)", ex: "Ich wohne seit einem Jahr hier.", exRu: "Я живу здесь год." },
+      { de: "für + Akkusativ", ru: "для", ex: "Das ist für dich.", exRu: "Это для тебя." },
+      { de: "ohne + Akkusativ", ru: "без", ex: "Ohne Termin geht es nicht.", exRu: "Без записи не получится." },
+      { de: "wegen + Genitiv", ru: "из-за", ex: "Wegen des Wetters bleiben wir zu Hause.", exRu: "Из-за погоды мы останемся дома." },
+      { de: "trotz + Genitiv", ru: "несмотря на", ex: "Trotz der Kälte gehe ich raus.", exRu: "Несмотря на холод, я выйду." },
+      { de: "weil", ru: "потому что (глагол в конец)", ex: "Ich bleibe, weil ich müde bin.", exRu: "Я остаюсь, потому что устал." },
+      { de: "obwohl", ru: "хотя", ex: "Obwohl es regnet, gehe ich spazieren.", exRu: "Хотя идёт дождь, я иду гулять." },
+      { de: "deshalb", ru: "поэтому (инверсия)", ex: "Es regnet, deshalb bleibe ich hier.", exRu: "Идёт дождь, поэтому я остаюсь." },
+      { de: "damit", ru: "чтобы (с подлежащим)", ex: "Ich lerne, damit ich die Prüfung bestehe.", exRu: "Я учусь, чтобы сдать экзамен." },
+      { de: "um … zu", ru: "чтобы (одно подлежащее)", ex: "Ich lerne, um die Prüfung zu bestehen.", exRu: "Я учусь, чтобы сдать экзамен." },
+      { de: "während + Genitiv", ru: "во время", ex: "Während des Kurses schreibe ich mit.", exRu: "Во время курса я конспектирую." },
+    ],
+  },
+  {
+    id: "alltag",
+    title: "Быт и учреждения",
+    de: "Alltag & Behörden",
+    hint: "Фразы для реальных ситуаций в Германии",
+    words: [
+      { de: "einen Termin vereinbaren", ru: "договориться о приёме", ex: "Ich möchte einen Termin vereinbaren.", exRu: "Я хотел бы записаться." },
+      { de: "das Bürgeramt", ru: "районное ведомство (прописка)", ex: "Beim Bürgeramt bekommt man die Anmeldung.", exRu: "Прописку оформляют в Bürgeramt." },
+      { de: "die Kaution", ru: "залог за квартиру", ex: "Die Kaution beträgt drei Kaltmieten.", exRu: "Залог — три холодных аренды." },
+      { de: "die Nebenkosten", ru: "коммунальные расходы", ex: "Sind die Nebenkosten inklusive?", exRu: "Коммунальные включены?" },
+      { de: "die Kündigung", ru: "расторжение, увольнение", ex: "Die Kündigung muss schriftlich sein.", exRu: "Расторжение должно быть письменным." },
+      { de: "die Überweisung", ru: "банковский перевод", ex: "Ich mache die Überweisung heute.", exRu: "Я сделаю перевод сегодня." },
+      { de: "Bescheid geben", ru: "дать знать", ex: "Gib mir bitte kurz Bescheid.", exRu: "Дай мне знать, пожалуйста." },
+      { de: "sich melden", ru: "выходить на связь", ex: "Ich melde mich morgen.", exRu: "Я свяжусь завтра." },
+      { de: "in Ordnung", ru: "в порядке, договорились", ex: "Alles in Ordnung.", exRu: "Всё в порядке." },
+      { de: "Es tut mir leid, aber …", ru: "Мне жаль, но…", ex: "Es tut mir leid, aber das geht nicht.", exRu: "Мне жаль, но это невозможно." },
+      { de: "Könnten Sie das wiederholen?", ru: "Могли бы Вы повторить?", ex: "Entschuldigung, könnten Sie das wiederholen?", exRu: "Извините, могли бы Вы повторить?" },
+      { de: "Was bedeutet das genau?", ru: "Что это точно значит?", ex: "Was bedeutet dieses Wort genau?", exRu: "Что именно значит это слово?" },
+      { de: "die Quittung", ru: "чек, квитанция", ex: "Brauchen Sie eine Quittung?", exRu: "Вам нужен чек?" },
+      { de: "die Verspätung", ru: "опоздание", ex: "Der Zug hat zehn Minuten Verspätung.", exRu: "Поезд опаздывает на десять минут." },
+    ],
+  },
+  {
+    id: "unijob",
+    title: "Учёба и работа",
+    de: "Uni & Arbeit",
+    hint: "Лексика лекций, экзаменов и смен",
+    words: [
+      { de: "die Vorlesung, -en", ru: "лекция", ex: "Die Vorlesung beginnt um neun.", exRu: "Лекция начинается в девять." },
+      { de: "die Prüfung, -en", ru: "экзамен", ex: "Ich bereite mich auf die Prüfung vor.", exRu: "Я готовлюсь к экзамену." },
+      { de: "die Hausarbeit, -en", ru: "письменная работа, реферат", ex: "Die Hausarbeit ist zwölf Seiten lang.", exRu: "Работа — двенадцать страниц." },
+      { de: "die Abgabe", ru: "сдача (работы)", ex: "Die Abgabe ist am 15. Mai.", exRu: "Сдача — 15 мая." },
+      { de: "der Stundenplan", ru: "расписание", ex: "Mein Stundenplan ist voll.", exRu: "Моё расписание забито." },
+      { de: "die Schicht, -en", ru: "смена (на работе)", ex: "Meine Schicht endet um 23 Uhr.", exRu: "Моя смена заканчивается в 23." },
+      { de: "der Lebenslauf", ru: "резюме", ex: "Schicken Sie bitte Ihren Lebenslauf.", exRu: "Пришлите, пожалуйста, резюме." },
+      { de: "das Vorstellungsgespräch", ru: "собеседование", ex: "Das Vorstellungsgespräch lief gut.", exRu: "Собеседование прошло хорошо." },
+      { de: "die Stelle, -n", ru: "рабочее место, вакансия", ex: "Die Stelle ist noch frei.", exRu: "Вакансия ещё свободна." },
+      { de: "der Umsatz", ru: "оборот, выручка", ex: "Der Umsatz ist gestiegen.", exRu: "Оборот вырос." },
+      { de: "die Nachfrage", ru: "спрос", ex: "Die Nachfrage nach Wohnungen ist hoch.", exRu: "Спрос на квартиры высокий." },
+      { de: "das Angebot und die Nachfrage", ru: "спрос и предложение", ex: "Angebot und Nachfrage bestimmen den Preis.", exRu: "Спрос и предложение определяют цену." },
+      { de: "die Zusammenarbeit", ru: "сотрудничество", ex: "Danke für die gute Zusammenarbeit.", exRu: "Спасибо за хорошее сотрудничество." },
+      { de: "der Kunde, -n", ru: "клиент", ex: "Der Kunde wartet schon.", exRu: "Клиент уже ждёт." },
+    ],
+  },
+];
+
+const L = (level, id, title, idea, blocks) => ({ level, id, title, idea, blocks });
+const GRAMMAR = [
+  L("A1", "a1-1", "Личные местоимения, sein и haben", "Два глагола, на которых держится половина простых фраз.", [
+    { h: "sein — быть", rows: [["ich bin", "wir sind"], ["du bist", "ihr seid"], ["er/sie/es ist", "sie/Sie sind"]] },
+    { h: "haben — иметь", rows: [["ich habe", "wir haben"], ["du hast", "ihr habt"], ["er/sie/es hat", "sie/Sie haben"]] },
+    { p: "В немецком нельзя опустить подлежащее: не «bin Student», а Ich bin Student." },
+    { ex: ["Ich bin aus Usbekistan.", "Wir haben heute keine Zeit.", "Bist du müde?"] },
+  ]),
+  L("A1", "a1-2", "Präsens: спряжение глаголов", "Одно окончание на каждое лицо — база всей речи.", [
+    { h: "machen", rows: [["ich mache", "wir machen"], ["du machst", "ihr macht"], ["er macht", "sie machen"]] },
+    { p: "Глаголы с изменением корня: fahren → du fährst, er fährt; sprechen → du sprichst, er spricht; lesen → du liest, er liest." },
+    { p: "Настоящее время выражает и будущее: Morgen fahre ich nach Hamburg." },
+    { ex: ["Ich arbeite abends im Restaurant.", "Er spricht sehr schnell."] },
+  ]),
+  L("A1", "a1-3", "Артикли и Akkusativ", "Меняется только мужской род — это вся сложность.", [
+    { h: "Определённый артикль", rows: [["Nominativ", "der / die / das / die"], ["Akkusativ", "den / die / das / die"]] },
+    { h: "Неопределённый", rows: [["Nominativ", "ein / eine / ein"], ["Akkusativ", "einen / eine / ein"]] },
+    { p: "Akkusativ отвечает на вопрос wen? was? и стоит после большинства глаголов: haben, brauchen, sehen, kaufen." },
+    { ex: ["Ich habe einen Termin.", "Sie kauft den Tisch.", "Wir brauchen ein Formular."] },
+  ]),
+  L("A1", "a1-4", "Отрицание: nicht и kein", "Существительное отрицаем kein, всё остальное — nicht.", [
+    { p: "kein стоит перед существительным с неопределённым артиклем или без артикля: Ich habe keine Zeit." },
+    { p: "nicht отрицает глагол, прилагательное или наречие и обычно стоит в конце: Ich komme heute nicht." },
+    { p: "Перед прилагательным nicht ставится непосредственно перед ним: Das ist nicht teuer." },
+    { ex: ["Ich habe kein Geld dabei.", "Er kommt nicht mit.", "Das ist nicht mein Vertrag."] },
+  ]),
+  L("A1", "a1-5", "Модальные глаголы", "Смысловой глагол уходит в конец в инфинитиве.", [
+    { h: "Значения", rows: [["können", "мочь, уметь"], ["müssen", "быть должным"], ["wollen", "хотеть"], ["möchten", "хотел бы (вежливо)"], ["dürfen", "иметь разрешение"], ["sollen", "следует, велено"]] },
+    { p: "В 1-м и 3-м лице ед. ч. окончания нет: ich kann, er kann." },
+    { ex: ["Ich muss heute länger arbeiten.", "Kannst du mir helfen?", "Hier darf man nicht parken."] },
+  ]),
+  L("A1", "a1-6", "Порядок слов и вопросы", "Глагол — на втором месте, всегда.", [
+    { p: "Утверждение: глагол на позиции 2. Heute gehe ich ins Kino. Первое место может занимать любой член предложения, но глагол не двигается." },
+    { p: "Ja/Nein-вопрос: глагол на первое место. Kommst du mit?" },
+    { p: "W-вопрос: вопросительное слово, потом глагол. Wann beginnt der Kurs?" },
+    { ex: ["Am Montag arbeite ich nicht.", "Warum bist du so früh hier?"] },
+  ]),
+  L("A1", "a1-7", "Perfekt — разговорное прошедшее", "haben или sein + Partizip II в конце.", [
+    { p: "Большинство глаголов с haben. С sein — глаголы движения и изменения состояния: gehen, fahren, kommen, bleiben, sein, werden." },
+    { h: "Образование Partizip II", rows: [["слабые", "ge- + корень + -t: gemacht"], ["сильные", "ge- + корень + -en: gesehen"], ["на -ieren", "без ge-: studiert"], ["неотделяемые", "без ge-: verstanden"]] },
+    { ex: ["Ich habe die Prüfung bestanden.", "Wir sind nach Berlin gefahren."] },
+  ]),
+  L("A1", "a1-8", "Отделяемые приставки", "Приставка улетает в конец предложения.", [
+    { p: "anrufen, aufstehen, einkaufen, mitkommen, vorschlagen. В Präsens и Imperativ приставка отделяется." },
+    { p: "В Perfekt ge- встаёт между приставкой и корнем: angerufen, eingekauft." },
+    { ex: ["Ich rufe dich später an.", "Stehst du früh auf?", "Ich habe gestern eingekauft."] },
+  ]),
+  L("A2", "a2-1", "Dativ и предлоги с Dativ", "Кому? где? — это Dativ.", [
+    { h: "Артикли в Dativ", rows: [["der →", "dem"], ["die →", "der"], ["das →", "dem"], ["die (мн.) →", "den + -n"]] },
+    { p: "Всегда Dativ: mit, nach, aus, zu, von, bei, seit, gegenüber." },
+    { p: "Глаголы с Dativ: helfen, danken, gehören, gefallen, passen, antworten." },
+    { ex: ["Ich helfe meinem Bruder.", "Wir fahren mit der U-Bahn.", "Das gefällt mir sehr."] },
+  ]),
+  L("A2", "a2-2", "Präteritum", "Письменное прошедшее; в речи — только war, hatte и модальные.", [
+    { h: "Основные формы", rows: [["sein", "ich war, wir waren"], ["haben", "ich hatte, wir hatten"], ["können", "ich konnte"], ["müssen", "ich musste"], ["werden", "ich wurde"]] },
+    { p: "Слабые глаголы: корень + -te: machen → machte. Сильные меняют гласную: gehen → ging, kommen → kam." },
+    { ex: ["Ich hatte gestern keine Zeit.", "Er war letzte Woche krank.", "Wir mussten früher gehen."] },
+  ]),
+  L("A2", "a2-3", "Wechselpräpositionen", "Wohin? — Akkusativ. Wo? — Dativ.", [
+    { p: "in, an, auf, über, unter, vor, hinter, neben, zwischen." },
+    { p: "Движение к цели → Akkusativ: Ich gehe in die Küche. Местоположение → Dativ: Ich bin in der Küche." },
+    { ex: ["Ich stelle das Buch auf den Tisch.", "Das Buch liegt auf dem Tisch."] },
+  ]),
+  L("A2", "a2-4", "Придаточные: weil, dass, wenn", "Спрягаемый глагол уходит в самый конец.", [
+    { p: "Ich bleibe zu Hause, weil ich müde bin. Глагол bin — последний." },
+    { p: "dass вводит содержание: Ich glaube, dass er recht hat." },
+    { p: "wenn — «если» и «когда» (повторяющееся): Wenn ich Zeit habe, rufe ich an. Если придаточное стоит первым, главное начинается сразу с глагола." },
+    { ex: ["Ich lerne Deutsch, weil ich hier studiere.", "Wenn du willst, gehen wir zusammen."] },
+  ]),
+  L("A2", "a2-5", "Склонение прилагательных", "Окончание зависит от того, есть ли артикль и какой.", [
+    { h: "После определённого артикля", rows: [["Nom. m/f/n", "der gute / die gute / das gute"], ["Akk. m", "den guten"], ["все прочие", "-en"]] },
+    { h: "После неопределённого", rows: [["Nom.", "ein guter / eine gute / ein gutes"], ["Akk. m", "einen guten"], ["Dativ", "einem guten"]] },
+    { p: "Без артикля прилагательное берёт окончание артикля: guter Kaffee, kaltes Wasser." },
+    { ex: ["Ich suche eine günstige Wohnung.", "Das ist ein interessanter Vorschlag."] },
+  ]),
+  L("A2", "a2-6", "Сравнительная и превосходная степень", "-er и am -sten, плюс несколько исключений.", [
+    { h: "Формы", rows: [["klein", "kleiner — am kleinsten"], ["gut", "besser — am besten"], ["viel", "mehr — am meisten"], ["gern", "lieber — am liebsten"], ["hoch", "höher — am höchsten"]] },
+    { p: "Сравнение: als после сравнительной степени, wie после равенства. Er ist älter als ich. Sie ist so alt wie ich." },
+    { ex: ["Diese Wohnung ist günstiger als die andere.", "Am liebsten trinke ich Tee."] },
+  ]),
+  L("A2", "a2-7", "Возвратные глаголы", "sich + правильный падеж местоимения.", [
+    { p: "sich freuen, sich interessieren, sich bewerben, sich erinnern, sich vorstellen." },
+    { p: "Если есть прямое дополнение, возвратное местоимение стоит в Dativ: Ich wasche mir die Hände." },
+    { ex: ["Ich interessiere mich für Wirtschaft.", "Wir freuen uns auf das Wochenende."] },
+  ]),
+  L("B1", "b1-1", "Konjunktiv II", "Вежливость, гипотезы, нереальные условия.", [
+    { h: "Ключевые формы", rows: [["sein", "ich wäre"], ["haben", "ich hätte"], ["können", "ich könnte"], ["werden", "ich würde"], ["остальные", "würde + Infinitiv"]] },
+    { p: "Нереальное условие: Wenn ich mehr Zeit hätte, würde ich mehr lesen." },
+    { p: "Прошедшее: hätte/wäre + Partizip II. Wenn ich das gewusst hätte, wäre ich nicht gekommen." },
+    { ex: ["Könnten Sie mir bitte helfen?", "An deiner Stelle würde ich warten."] },
+  ]),
+  L("B1", "b1-2", "Passiv", "werden + Partizip II. Важно действие, не исполнитель.", [
+    { h: "Времена", rows: [["Präsens", "Das Formular wird geprüft."], ["Präteritum", "Das Formular wurde geprüft."], ["Perfekt", "Das Formular ist geprüft worden."], ["с модальным", "Das Formular muss geprüft werden."]] },
+    { p: "Исполнитель вводится через von (лицо) или durch (средство, причина)." },
+    { ex: ["Die Rechnung wird per E-Mail geschickt.", "Der Vertrag wurde gestern unterschrieben."] },
+  ]),
+  L("B1", "b1-3", "Относительные придаточные", "Род и число — от существительного, падеж — от роли в придаточном.", [
+    { h: "Relativpronomen", rows: [["Nom.", "der / die / das / die"], ["Akk.", "den / die / das / die"], ["Dat.", "dem / der / dem / denen"], ["Gen.", "dessen / deren"]] },
+    { p: "Der Kollege, der neben mir sitzt, kommt aus Polen. Der Kollege, den ich meine, ist neu." },
+    { ex: ["Das ist die Wohnung, die ich gemietet habe.", "Die Firma, bei der ich arbeite, ist klein."] },
+  ]),
+  L("B1", "b1-4", "Genitiv", "Принадлежность и книжные предлоги.", [
+    { p: "der Vertrag des Kunden, die Meinung der Kollegin. Мужской и средний род получают -s или -es." },
+    { p: "Предлоги: wegen, trotz, während, statt, innerhalb, aufgrund." },
+    { p: "В разговорной речи Genitiv часто заменяют на von + Dativ: das Auto von meinem Bruder." },
+    { ex: ["Während der Prüfung darf man nicht sprechen.", "Aufgrund des Wetters fällt der Kurs aus."] },
+  ]),
+  L("B1", "b1-5", "Глаголы с предлогами и wo(r)-", "Предлог задан глаголом, его нужно учить наизусть.", [
+    { p: "warten auf + A, sich freuen auf + A, denken an + A, sich interessieren für + A, teilnehmen an + D, abhängen von + D." },
+    { p: "Вопрос о предмете: Worauf wartest du? О человеке: Auf wen wartest du?" },
+    { p: "Отсылка назад: Ich denke daran. Ich freue mich darauf." },
+    { ex: ["Ich warte auf eine Antwort.", "Das hängt vom Wetter ab."] },
+  ]),
+  L("B1", "b1-6", "Инфинитив с zu, um … zu", "Цель и зависимый инфинитив.", [
+    { p: "zu ставится перед инфинитивом: Ich habe vor, nach Hamburg zu fahren. У отделяемых — внутри: mitzukommen." },
+    { p: "um … zu = цель, когда подлежащее одно. Иначе damit." },
+    { p: "Без zu: модальные, sehen, hören, lassen, gehen. Ich lasse das Auto reparieren." },
+    { ex: ["Ich arbeite, um mein Studium zu finanzieren.", "Es ist wichtig, pünktlich zu sein."] },
+  ]),
+  L("B2", "b2-1", "Коннекторы уступки и следствия", "obwohl, trotzdem, deshalb, dennoch — разные позиции глагола.", [
+    { h: "Позиция глагола", rows: [["obwohl, weil, da", "глагол в конец"], ["trotzdem, deshalb, dennoch", "инверсия: глагол сразу после"], ["aber, denn, und", "порядок не меняется"]] },
+    { p: "Obwohl es spät war, blieb er. — Es war spät, trotzdem blieb er. Смысл один, синтаксис разный." },
+    { ex: ["Da die Frist abläuft, müssen wir heute entscheiden."] },
+  ]),
+  L("B2", "b2-2", "Причастия как определения", "Partizip I — активное, Partizip II — пассивное.", [
+    { p: "Partizip I: Infinitiv + d. der wartende Kunde — клиент, который ждёт." },
+    { p: "Partizip II: der unterschriebene Vertrag — договор, который подписали." },
+    { p: "Расширенное определение: der gestern von der Chefin unterschriebene Vertrag." },
+    { ex: ["Die steigenden Preise sind ein Problem.", "Das ist ein gut geschriebener Text."] },
+  ]),
+  L("B2", "b2-3", "Konjunktiv I — косвенная речь", "Язык прессы и отчётов.", [
+    { h: "Формы", rows: [["sein", "er sei, sie seien"], ["haben", "er habe"], ["прочие", "er komme, er gebe"], ["если совпадает с Indikativ", "берём Konjunktiv II: sie hätten"]] },
+    { p: "Der Minister sagte, die Lage sei stabil." },
+    { ex: ["Er behauptet, er habe nichts gewusst."] },
+  ]),
+  L("B2", "b2-4", "Номинальный и глагольный стиль", "Переход между придаточным и существительным.", [
+    { h: "Соответствия", rows: [["weil …", "wegen + G"], ["obwohl …", "trotz + G"], ["wenn …", "bei + D / im Falle + G"], ["nachdem …", "nach + D"]] },
+    { p: "Nachdem wir den Vertrag geprüft hatten, unterschrieben wir. → Nach der Prüfung des Vertrags unterschrieben wir." },
+    { ex: ["Wegen der hohen Nachfrage steigen die Preise."] },
+  ]),
+  L("C1", "c1-1", "Замены пассива", "Пассив без werden — признак зрелого стиля.", [
+    { h: "Конструкции", rows: [["sich lassen + Inf.", "Das lässt sich leicht erklären."], ["sein + zu + Inf.", "Der Antrag ist bis Freitag einzureichen."], ["-bar / -lich", "Das ist machbar / verständlich."], ["man", "Man kann das leicht erklären."]] },
+    { p: "Все четыре передают «это может / должно быть сделано», но различаются регистром: sein + zu — самый формальный." },
+    { ex: ["Diese Frage lässt sich nicht schnell beantworten."] },
+  ]),
+  L("C1", "c1-2", "Модальные частицы", "Слова без перевода, которые задают тон.", [
+    { h: "Оттенки", rows: [["doch", "возражение, настойчивость"], ["mal", "смягчение просьбы"], ["ja", "очевидность"], ["eben / halt", "смирение с фактом"], ["wohl", "предположение"], ["denn", "интерес в вопросе"]] },
+    { p: "Komm mal her. — Das ist ja interessant. — Er ist wohl krank. — Was machst du denn hier?" },
+    { ex: ["Das war eben keine gute Idee.", "Ruf ihn doch einfach an."] },
+  ]),
+  L("C1", "c1-3", "Сложные коннекторы", "Точность связи между мыслями.", [
+    { h: "Значения", rows: [["sofern", "при условии, что"], ["insofern als", "постольку, поскольку"], ["zumal", "тем более что"], ["indem", "тем, что (способ)"], ["ohne dass", "без того чтобы"], ["anstatt dass", "вместо того чтобы"]] },
+    { p: "Sofern die Frist eingehalten wird, ist alles in Ordnung. — Man spart Zeit, indem man den Antrag online stellt." },
+    { ex: ["Er kam nicht, zumal das Wetter schlecht war."] },
+  ]),
+];
+const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
+
+window.DECKS = DECKS;
+window.GRAMMAR = GRAMMAR;
+window.LEVELS = LEVELS;

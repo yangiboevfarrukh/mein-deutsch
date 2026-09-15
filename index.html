@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#E8E9E3" />
+  <title>Mein Deutsch — личный тренажёр немецкого</title>
+  <meta name="description" content="Карточки, грамматика A1–C1, голосовой тренажёр произношения, разговор с ИИ и домашние задания." />
+
+  <!-- Библиотеки. Заменить на локальные копии можно в любой момент: скачайте файлы и укажите свои пути. -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js" crossorigin></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    html, body { margin: 0; padding: 0; background: #E8E9E3; -webkit-text-size-adjust: 100%; }
+    #root { min-height: 100vh; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #14504A; outline-offset: 2px; }
+    #boot { font: 15px system-ui; color: #6B7268; padding: 40px 20px; text-align: center; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+<body>
+  <div id="root"><div id="boot">Загружаю приложение…</div></div>
+
+  <!-- Словарь и грамматика: обычный JavaScript, правится без сборки -->
+  <script src="data.js"></script>
+  <!-- Интерфейс: JSX, компилируется в браузере -->
+  <script type="text/babel" data-presets="react" src="app.jsx"></script>
+</body>
+</html>
